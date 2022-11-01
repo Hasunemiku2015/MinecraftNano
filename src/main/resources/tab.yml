@@ -1,0 +1,5 @@
+# Configure the tab character used in different file format.
+# By default, the tab character is '\t'.
+# To change the tab character to certain amount of spaces, type the file extension and the number of spaces.
+# Example:
+# py: 4

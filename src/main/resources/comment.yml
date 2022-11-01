@@ -1,0 +1,5 @@
+# Configure the comment character used in different file format.
+# By default, the tab character is '#'.
+# To change the comment character, type the file extension and the comment character.
+# Example:
+# java: '//'
