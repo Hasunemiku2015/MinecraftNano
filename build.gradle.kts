@@ -1,6 +1,5 @@
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.util.UUID
 
 var projectVersion = "0.1"
 var defaultPerm = net.minecrell.pluginyml.bukkit.BukkitPluginDescription.Permission.Default.OP
