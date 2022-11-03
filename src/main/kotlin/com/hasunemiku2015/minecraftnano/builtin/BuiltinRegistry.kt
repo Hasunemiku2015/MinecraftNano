@@ -70,6 +70,8 @@ object BuiltinRegistry {
         NanoRegistry.registerAltFunction(LastLineFunction)
         NanoRegistry.registerAltFunction(NextOccurrenceBackwardFunction)
         NanoRegistry.registerAltFunction(NextOccurrenceForwardFunction)
+        NanoRegistry.registerAltFunction(NextTextBlockFunction)
+        NanoRegistry.registerAltFunction(PreviousTextBlockFunction)
         NanoRegistry.registerAltFunction(RedoFunction)
         NanoRegistry.registerAltFunction(UndoFunction)
         NanoRegistry.registerAltFunction(UnIndentFunction)
