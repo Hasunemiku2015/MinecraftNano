@@ -33,45 +33,43 @@ object InsertFileFunction: Function, EventHandler() {
     }
 
     override fun exec(editor: TextEditor, args: List<String>) {
-        super.d(editor) {
-            if (args.isNotEmpty()) {
-                // Path Specified
-                var path = args[0]
-                val file: File
+        if (args.isNotEmpty()) {
+            // Path Specified
+            var path = args[0]
+            val file: File
 
-                if (path.startsWith("~")) {
-                    // Start from server.jar directory
-                    path.removePrefix("~")
-                    path = ".$path"
-                    file = File(path)
-                } else {
-                    // Start from directory of the editing file
-                    path = path.removePrefix("./")
-                    file = File(editor.file.parentFile.canonicalPath + "/" + path)
-                }
-
-                if (!file.exists() || file.isDirectory) {
-                    val line = if (!file.exists()) {
-                        FunctionHelper.centerString(editor, ChatColor.DARK_RED + "[ File ${file.name} doesn't exist]")
-                    } else {
-                        FunctionHelper.centerString(editor, ChatColor.DARK_RED + "[ File ${file.name} is a directory]")
-                    }
-
-                    editor.lowBlankLine = line
-                    runTaskLater(NanoPlugin.PLUGIN, 5*20) {
-                        if (editor.lowBlankLine == line) {
-                            editor.lowBlankLine = ""
-                        }
-                    }
-                }
-
-                insertFileToBuffer(file, editor)
+            if (path.startsWith("~")) {
+                // Start from server.jar directory
+                path.removePrefix("~")
+                path = ".$path"
+                file = File(path)
             } else {
-                val session = InsertFileSession(editor.file.parentFile, 0)
-                InsertFileChatEvent.PLAYER_ARGS[editor.player] = session
-                NanoChatEvent.PAUSE_EDITING.add(editor.player)
-                printDirOutputBuffer(editor, session)
+                // Start from directory of the editing file
+                path = path.removePrefix("./")
+                file = File(editor.file.parentFile.canonicalPath + "/" + path)
             }
+
+            if (!file.exists() || file.isDirectory) {
+                val line = if (!file.exists()) {
+                    FunctionHelper.centerString(editor, ChatColor.DARK_RED + "[ File ${file.name} doesn't exist]")
+                } else {
+                    FunctionHelper.centerString(editor, ChatColor.DARK_RED + "[ File ${file.name} is a directory]")
+                }
+
+                editor.lowBlankLine = line
+                runTaskLater(NanoPlugin.PLUGIN, 5*20) {
+                    if (editor.lowBlankLine == line) {
+                        editor.lowBlankLine = ""
+                    }
+                }
+            }
+
+            insertFileToBuffer(file, editor)
+        } else {
+            val session = InsertFileSession(editor.file.parentFile, 0)
+            InsertFileChatEvent.PLAYER_ARGS[editor.player] = session
+            NanoChatEvent.PAUSE_EDITING.add(editor.player)
+            printDirOutputBuffer(editor, session)
         }
     }
 
@@ -149,32 +147,34 @@ object InsertFileFunction: Function, EventHandler() {
      * @param editor The editor to insert into
      */
     internal fun insertFileToBuffer(fileInsert: File, editor: TextEditor) {
-        val fileData = arrayListOf<String>()
-        with (BufferedReader(FileReader(fileInsert))) {
-            fileData.addAll(this.readLines())
-        }
+        super.d(editor) {
+            val fileData = arrayListOf<String>()
+            with (BufferedReader(FileReader(fileInsert))) {
+                fileData.addAll(this.readLines())
+            }
 
-        val currentLine = editor.fileData[editor.cursorPosition]
-        val curLinePrefix = currentLine.substring(0, editor.cursorCharPosition)
-        val curLineSuffix = currentLine.substring(editor.cursorCharPosition)
+            val currentLine = editor.fileData[editor.cursorPosition]
+            val curLinePrefix = currentLine.substring(0, editor.cursorCharPosition)
+            val curLineSuffix = currentLine.substring(editor.cursorCharPosition)
 
-        if (fileData.size == 1) {
-            editor.fileData[editor.cursorPosition] = curLinePrefix + fileData[0] + curLineSuffix
-            editor.outputBuffer[editor.cursorPosition] = editor.fileData[editor.cursorPosition]
-        } else if (fileData.size > 1) {
-            editor.fileData[editor.cursorPosition] = curLinePrefix + fileData[0]
-            editor.outputBuffer[editor.cursorPosition] = editor.fileData[editor.cursorPosition]
-            for ((idx, str) in fileData.withIndex()) {
-                if (idx == 0) {
-                    continue
-                }
-                if (idx == fileData.size - 1) {
-                    editor.fileData.insert(editor.cursorPosition + 1, str + curLineSuffix)
-                    editor.outputBuffer[editor.cursorPosition] = editor.fileData[editor.cursorPosition]
-                    break
-                }
-                editor.fileData.insert(editor.cursorPosition + 1, str)
+            if (fileData.size == 1) {
+                editor.fileData[editor.cursorPosition] = curLinePrefix + fileData[0] + curLineSuffix
                 editor.outputBuffer[editor.cursorPosition] = editor.fileData[editor.cursorPosition]
+            } else if (fileData.size > 1) {
+                editor.fileData[editor.cursorPosition] = curLinePrefix + fileData[0]
+                editor.outputBuffer[editor.cursorPosition] = editor.fileData[editor.cursorPosition]
+                for ((idx, str) in fileData.withIndex()) {
+                    if (idx == 0) {
+                        continue
+                    }
+                    if (idx == fileData.size - 1) {
+                        editor.fileData.insert(editor.cursorPosition + 1, str + curLineSuffix)
+                        editor.outputBuffer[editor.cursorPosition] = editor.fileData[editor.cursorPosition]
+                        break
+                    }
+                    editor.fileData.insert(editor.cursorPosition + 1, str)
+                    editor.outputBuffer[editor.cursorPosition] = editor.fileData[editor.cursorPosition]
+                }
             }
         }
     }
