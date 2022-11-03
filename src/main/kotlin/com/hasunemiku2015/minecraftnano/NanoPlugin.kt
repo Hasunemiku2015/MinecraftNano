@@ -4,6 +4,7 @@ import com.comphenix.protocol.ProtocolLibrary
 import com.deanveloper.kbukkit.util.Commands
 import com.deanveloper.kbukkit.util.registerEvents
 import com.hasunemiku2015.minecraftnano.builtin.BuiltinRegistry
+import com.hasunemiku2015.minecraftnano.builtin.altfunction.SelectionEventSubscriber
 import com.hasunemiku2015.minecraftnano.builtin.function.*
 import com.hasunemiku2015.minecraftnano.commands.*
 import com.hasunemiku2015.minecraftnano.events.NanoChatEvent
@@ -40,6 +41,7 @@ class NanoPlugin: JavaPlugin() {
             ProtocolLibrary.getProtocolManager().addPacketListener(NanoPacketEvent)
         }
 
+        // Bukkit Events
         CopyCommand.registerEvents(this)
         MoveCommand.registerEvents(this)
         NanoCommand.registerEvents(this)
@@ -52,6 +54,9 @@ class NanoPlugin: JavaPlugin() {
         ReplaceWithSessionChatEvent.registerEvents(this)
         ReplaceSessionChatEvent.registerEvents(this)
         SearchChatEvent.registerEvents(this)
+
+        // MinecraftNano Events
+        SelectionEventSubscriber.init()
 
         CommentCharConfiguration.load()
         TabCharConfiguration.load()

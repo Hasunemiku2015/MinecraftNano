@@ -1,5 +1,6 @@
 package com.hasunemiku2015.minecraftnano
 
+import com.hasunemiku2015.minecraftnano.api.EventHandler
 import com.hasunemiku2015.minecraftnano.api.NanoRegistry
 import com.hasunemiku2015.minecraftnano.commands.NanoCommand
 import com.hasunemiku2015.minecraftnano.datastruct.SparseVector
@@ -90,16 +91,7 @@ class TextEditor(val player: Player, val file: File) {
             }
         } else {
             // Add text to editor if not command.
-            val lineString = fileData[cursorPosition]
-            if (cursorCharPosition > 0) {
-                val s1 = lineString.substring(0, cursorCharPosition) + message
-                fileData[cursorPosition] = s1 + lineString.substring(cursorCharPosition)
-                cursorCharPosition = s1.length
-            } else {
-                fileData[cursorPosition] = message + lineString
-                cursorCharPosition = message.length - 1
-            }
-            outputBuffer[cursorPosition] = fileData[cursorPosition]
+            TextAdditionHandler.insertText(this, message)
         }
 
         if (runPostprocessor) {
@@ -175,5 +167,36 @@ class TextEditor(val player: Player, val file: File) {
         result = 31 * result + cursorCharPosition
         result = 31 * result + currentPage
         return result
+    }
+
+    /**
+     * Using a handler to allow subscription of events for text editing.
+     * @author hasunemiku2015
+     * @date 2022/11/03 15:09
+     * @see TextEditor
+     * @see EventHandler
+     */
+    object TextAdditionHandler: EventHandler() {
+        /**
+         * Function for inserting text to TextEditor. Separated to allow event subscription.
+         * @param editor TextEditor for string insertion.
+         * @param message The string to insert.
+         * @see TextEditor
+         * @see EventHandler
+         */
+        fun insertText(editor: TextEditor, message: String) {
+            super.d(editor) {
+                val lineString = editor.fileData[editor.cursorPosition]
+                if (editor.cursorCharPosition > 0) {
+                    val s1 = lineString.substring(0, editor.cursorCharPosition) + message
+                    editor.fileData[editor.cursorPosition] = s1 + lineString.substring(editor.cursorCharPosition)
+                    editor.cursorCharPosition = s1.length
+                } else {
+                    editor.fileData[editor.cursorPosition] = message + lineString
+                    editor.cursorCharPosition = message.length - 1
+                }
+                editor.outputBuffer[editor.cursorPosition] = editor.fileData[editor.cursorPosition]
+            }
+        }
     }
 }
