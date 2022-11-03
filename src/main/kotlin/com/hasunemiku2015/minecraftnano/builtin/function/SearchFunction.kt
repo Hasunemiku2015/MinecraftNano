@@ -335,7 +335,7 @@ data class SearchConfiguration (var isCaseSensitive: Boolean, var isRegex: Boole
                                var isReplace: Boolean, var searchReplaceRecord: ArrayList<String>, var recPos: Int) {
     companion object {
         private val SEARCH_CONFIGURATION = hashMapOf<Player, SearchConfiguration>()
-        internal var TextEditor.searchConfiguration: SearchConfiguration
+        var TextEditor.searchConfiguration: SearchConfiguration
             get() = SEARCH_CONFIGURATION[player] ?: SearchConfiguration(
                 isCaseSensitive = false,
                 isRegex = false,

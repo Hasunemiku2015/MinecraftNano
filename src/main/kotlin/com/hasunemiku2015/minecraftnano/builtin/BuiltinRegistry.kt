@@ -68,6 +68,8 @@ object BuiltinRegistry {
         NanoRegistry.registerAltFunction(GoMatchBracketFunction)
         NanoRegistry.registerAltFunction(IndentFunction)
         NanoRegistry.registerAltFunction(LastLineFunction)
+        NanoRegistry.registerAltFunction(NextOccurrenceBackwardFunction)
+        NanoRegistry.registerAltFunction(NextOccurrenceForwardFunction)
         NanoRegistry.registerAltFunction(RedoFunction)
         NanoRegistry.registerAltFunction(UndoFunction)
         NanoRegistry.registerAltFunction(UnIndentFunction)
