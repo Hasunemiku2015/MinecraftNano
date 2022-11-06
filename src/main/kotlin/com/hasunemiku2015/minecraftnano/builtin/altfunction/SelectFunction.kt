@@ -41,6 +41,8 @@ object SelectFunction: AltFunction, EventHandler() {
             }
         } else {
             editor.lowBlankLine = "[ Mark Unset ]"
+            editor.showCursor = true
+            editor.selectionRange = DEFAULT_SELECTION_RANGE
             editor.rightHeader = DisplayPostProcessor.DisplayConfiguration.DEFAULT_CONFIG.rightHeader
             editor.runPostprocessors()
             editor.lowBlankLine = ""
@@ -253,6 +255,7 @@ object SelectionTerminateEvent: ProcessEvent {
         if (!editor.isSelectionMode()) {
             return false
         }
+        editor.showCursor = true
         editor.selectionRange = DEFAULT_SELECTION_RANGE
         editor.rightHeader = DisplayPostProcessor.DisplayConfiguration.DEFAULT_CONFIG.rightHeader
         return false
