@@ -69,7 +69,7 @@ object SelectFunction: AltFunction, EventHandler() {
      * Check if a specified TextEditor session is in selection mode.
      * @return True if the TextEditor is in selection mode, false otherwise.
      */
-    internal fun TextEditor.isSelectionMode(): Boolean {
+    fun TextEditor.isSelectionMode(): Boolean {
         return this.selectionRange != DEFAULT_SELECTION_RANGE
     }
 }
