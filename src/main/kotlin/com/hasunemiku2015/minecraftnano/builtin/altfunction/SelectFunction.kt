@@ -1,9 +1,11 @@
 package com.hasunemiku2015.minecraftnano.builtin.altfunction
 
 import com.deanveloper.kbukkit.chat.plus
+import com.deanveloper.kbukkit.util.runTaskLater
 import com.hasunemiku2015.minecraftnano.NanoPlugin
 import com.hasunemiku2015.minecraftnano.TextEditor
 import com.hasunemiku2015.minecraftnano.api.*
+import com.hasunemiku2015.minecraftnano.builtin.FunctionHelper
 import com.hasunemiku2015.minecraftnano.builtin.altfunction.SelectFunction.isSelectionMode
 import com.hasunemiku2015.minecraftnano.builtin.altfunction.SelectionRange.Companion.DEFAULT_SELECTION_RANGE
 import com.hasunemiku2015.minecraftnano.builtin.altfunction.SelectionRange.Companion.selectionRange
@@ -27,12 +29,16 @@ object SelectFunction: AltFunction, EventHandler() {
     }
 
     override fun exec(editor: TextEditor, args: List<String>) {
-        val toggle = editor.toggleSelection()
+        val toggle = editor.toggleSelection(editor.cursorPosition, editor.cursorCharPosition)
         if (toggle) {
-            editor.lowBlankLine = "[ Mark Set ]"
+            editor.lowBlankLine = FunctionHelper.centerString(editor, "[ Mark Set ]")
             editor.rightHeader = "SELECT"
             editor.runPostprocessors()
-            editor.lowBlankLine = ""
+            runTaskLater(NanoPlugin.PLUGIN, 5) {
+                if (editor.lowBlankLine == FunctionHelper.centerString(editor, "[ Mark Set ]")) {
+                    editor.lowBlankLine = ""
+                }
+            }
         } else {
             editor.lowBlankLine = "[ Mark Unset ]"
             editor.rightHeader = DisplayPostProcessor.DisplayConfiguration.DEFAULT_CONFIG.rightHeader
@@ -140,16 +146,16 @@ object SelectionEventSubscriber {
         NextPageFunction.subscribeEvent(SelectionCursorNavigationEvent)
         PrevPageFunction.subscribeEvent(SelectionCursorNavigationEvent)
 
-        AnchorForwardFunction.subscribeEvent(SelectionCursorNavigationEvent)
-        AnchorBackwardFunction.subscribeEvent(SelectionCursorNavigationEvent)
-        BackwardWordFunction.subscribeEvent(SelectionCursorNavigationEvent)
-        FirstLineFunction.subscribeEvent(SelectionCursorNavigationEvent)
-        GoMatchBracketFunction.subscribeEvent(SelectionCursorNavigationEvent)
         IndentFunction.subscribeEvent(SelectionCursorNavigationEvent)
-        LastLineFunction.subscribeEvent(SelectionCursorNavigationEvent)
-        LastLineFunction.subscribeEvent(SelectionCursorNavigationEvent)
-        PreviousTextBlockFunction.subscribeEvent(SelectionCursorNavigationEvent)
-        NextTextBlockFunction.subscribeEvent(SelectionCursorNavigationEvent)
+
+        // SelectionCursorJumpEvent
+        AnchorForwardFunction.subscribeEvent(SelectionCursorJumpEvent)
+        AnchorBackwardFunction.subscribeEvent(SelectionCursorJumpEvent)
+        GoMatchBracketFunction.subscribeEvent(SelectionCursorJumpEvent)
+        FirstLineFunction.subscribeEvent(SelectionCursorJumpEvent)
+        LastLineFunction.subscribeEvent(SelectionCursorJumpEvent)
+        PreviousTextBlockFunction.subscribeEvent(SelectionCursorJumpEvent)
+        NextTextBlockFunction.subscribeEvent(SelectionCursorJumpEvent)
 
         // SelectionTerminateEvent
         GotoLineFunction.subscribeEvent(SelectionTerminateEvent)
@@ -171,6 +177,7 @@ object SelectionEventSubscriber {
  * @date 2022/11/03 15:38
  * @see SelectionEventSubscriber
  */
+@ProcessPriority(ProcessPriorityLevel.LOW)
 object SelectionCursorNavigationEvent: ProcessEvent {
     override fun onProcessEnd(editor: TextEditor) {
         if (!editor.isSelectionMode()) {
@@ -196,18 +203,18 @@ object SelectionCursorNavigationEvent: ProcessEvent {
         } else {
             for ((idx, dat) in editor.outputBuffer.asList().withIndex()) {
                 if (idx == editor.selectionRange.startLinePos) {
-                    val str = editor.outputBuffer[updatedRange.startLinePos].ifEmpty { " " }
-                    editor.outputBuffer[updatedRange.startLinePos] = str.substring(0, updatedRange.startCharPos) +
+                    val str = dat.ifEmpty { " " }
+                    editor.outputBuffer[idx] = str.substring(0, updatedRange.startCharPos) +
                             ChatColor.LIGHT_PURPLE + str.substring(updatedRange.startCharPos)
                 }
 
                 if (idx > editor.selectionRange.startLinePos && idx < editor.selectionRange.endLinePos) {
-                    editor.outputBuffer[idx] = ChatColor.LIGHT_PURPLE + editor.outputBuffer[idx]
+                    editor.outputBuffer[idx] = ChatColor.LIGHT_PURPLE + dat
                 }
 
                 if (idx == editor.selectionRange.endLinePos) {
-                    val str = editor.outputBuffer[updatedRange.endLinePos].ifEmpty { " " }
-                    editor.outputBuffer[updatedRange.startLinePos] = ChatColor.LIGHT_PURPLE +
+                    val str = dat.ifEmpty { " " }
+                    editor.outputBuffer[idx] = ChatColor.LIGHT_PURPLE +
                             str.substring(0, updatedRange.endCharPos) + ChatColor.UNDERLINE +
                             str.substring(updatedRange.endCharPos, updatedRange.endCharPos + 1) +
                             ChatColor.RESET + str.substring(updatedRange.endCharPos + 1)
@@ -217,22 +224,22 @@ object SelectionCursorNavigationEvent: ProcessEvent {
     }
 }
 
-///**
-// * Changes the selection range position only. Reset its size to 1.
-// * @author hasunemiku2015
-// * @date 2022/11/03 16:13
-// * @see SelectionEventSubscriber
-// */
-//object SelectionCursorJumpEvent: ProcessEvent {
-//    override fun onProcessEnd(editor: TextEditor) {
-//        if (!editor.isSelectionMode()) {
-//            return
-//        }
-//        val range = editor.selectionRange
-//        editor.selectionRange = SelectionRange(editor.cursorPosition, editor.cursorCharPosition,
-//            editor.cursorPosition, editor.cursorCharPosition)
-//    }
-//}
+/**
+ * Changes the selection range position only. Reset its size to 1.
+ * @author hasunemiku2015
+ * @date 2022/11/03 16:13
+ * @see SelectionEventSubscriber
+ */
+@ProcessPriority(ProcessPriorityLevel.LOW)
+object SelectionCursorJumpEvent: ProcessEvent {
+    override fun onProcessEnd(editor: TextEditor) {
+        if (!editor.isSelectionMode()) {
+            return
+        }
+        editor.selectionRange = SelectionRange(editor.cursorPosition, editor.cursorCharPosition,
+            editor.cursorPosition, editor.cursorCharPosition)
+    }
+}
 
 /**
  * Terminates the selection when process starts.
@@ -240,6 +247,7 @@ object SelectionCursorNavigationEvent: ProcessEvent {
  * @date 2022/11/03 16:19
  * @see SelectionEventSubscriber
  */
+@ProcessPriority(ProcessPriorityLevel.LOW)
 object SelectionTerminateEvent: ProcessEvent {
     override fun onProcessStart(editor: TextEditor): Boolean {
         if (!editor.isSelectionMode()) {

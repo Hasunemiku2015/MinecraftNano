@@ -17,6 +17,7 @@ object BuiltinRegistry {
         NanoRegistry.registerPostprocessor(DisplayPostProcessor)
 
         // Register DestructionProcessors
+        NanoRegistry.registerDestructionProcessor(DisplayPostProcessor.DisplayDestructionProcessor)
         NanoRegistry.registerDestructionProcessor(ExitChatEvent)
         NanoRegistry.registerDestructionProcessor(GotoLineChatEvent.EventDestructionProcessor)
         NanoRegistry.registerDestructionProcessor(InsertFileChatEvent.EventDestructionProcessor)
@@ -74,6 +75,7 @@ object BuiltinRegistry {
         NanoRegistry.registerAltFunction(NextTextBlockFunction)
         NanoRegistry.registerAltFunction(PreviousTextBlockFunction)
         NanoRegistry.registerAltFunction(RedoFunction)
+        NanoRegistry.registerAltFunction(SelectFunction)
         NanoRegistry.registerAltFunction(UndoFunction)
         NanoRegistry.registerAltFunction(UnIndentFunction)
     }

@@ -3,10 +3,7 @@ package com.hasunemiku2015.minecraftnano.builtin.processor
 import com.deanveloper.kbukkit.chat.plus
 import com.hasunemiku2015.minecraftnano.NanoPlugin
 import com.hasunemiku2015.minecraftnano.TextEditor
-import com.hasunemiku2015.minecraftnano.api.EventHandler
-import com.hasunemiku2015.minecraftnano.api.Postprocessor
-import com.hasunemiku2015.minecraftnano.api.ProcessPriority
-import com.hasunemiku2015.minecraftnano.api.ProcessPriorityLevel
+import com.hasunemiku2015.minecraftnano.api.*
 import com.hasunemiku2015.minecraftnano.builtin.altfunction.AnchorStore.isAnchored
 import com.hasunemiku2015.minecraftnano.commands.NanoPrefCommand.preference
 import com.hasunemiku2015.minecraftnano.events.NanoPacketEvent.sendMessage
@@ -31,6 +28,13 @@ object DisplayPostProcessor : Postprocessor, EventHandler() {
     ) {
         companion object {
             val DEFAULT_CONFIG = DisplayConfiguration()
+        }
+    }
+
+    @ProcessPriority(ProcessPriorityLevel.NORMAL)
+    object DisplayDestructionProcessor: DestructionProcessor {
+        override fun onEditorDestroy(editor: TextEditor) {
+            PLAYER_CONFIGURATIONS.remove(editor.player)
         }
     }
 
@@ -141,19 +145,22 @@ object DisplayPostProcessor : Postprocessor, EventHandler() {
 
             editor.sendMessage(getHeaderLine(it))
             editor.sendMessage("")
-            val printData = arrayListOf<String>()
+
+            var count = 0
             for ((idx, s) in it.outputBuffer.asList((it.currentPage + 1) * 15).withIndex()) {
+                if (count >= 15) {
+                    break
+                }
+
                 val lineString = (if (it.isAnchored(idx)) ChatColor.AQUA else ChatColor.DARK_GRAY) +
                         "${idx + 1} " + ChatColor.RESET + s
+                editor.sendMessage(lineString)
 
-                // Split line if longer than max Char
-                val lineArray = lineString.split(Regex("(?<=\\G.{${it.preference.maxCharLine}})"))
-                printData.addAll(lineArray)
+                // Print less lines if longer than maxChar
+                count += (lineString.length - 1) / it.preference.maxCharLine
+                count++
             }
 
-            for (i in it.currentPage * 15 until (it.currentPage + 1) * 15) {
-                editor.sendMessage(printData[i])
-            }
             editor.sendMessage(it.lowBlankLine)
             editor.sendMessage(it.helpLine1)
             editor.sendMessage(it.helpLine2)
