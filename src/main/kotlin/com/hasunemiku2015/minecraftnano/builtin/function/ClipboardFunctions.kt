@@ -5,6 +5,9 @@ import com.hasunemiku2015.minecraftnano.TextEditor
 import com.hasunemiku2015.minecraftnano.api.*
 import com.hasunemiku2015.minecraftnano.api.Function
 import com.hasunemiku2015.minecraftnano.builtin.altfunction.SelectFunction.isSelectionMode
+import com.hasunemiku2015.minecraftnano.builtin.function.ClipboardStore.clearClipboard
+import com.hasunemiku2015.minecraftnano.builtin.function.ClipboardStore.clipBoard
+import com.hasunemiku2015.minecraftnano.builtin.function.ClipboardStore.isEmptyClipboard
 import org.bukkit.entity.Player
 
 // ================================================================================================================== //
@@ -83,7 +86,38 @@ object CutFunction: Function, EventHandler() {
     }
 
     override fun exec(editor: TextEditor, args: List<String>) {
+        executeCopyCut(editor, args, true)
+    }
 
+    /**
+     * Common function for copy and cut.
+     * @param editor TextEditor session to edit.
+     * @param args Arguments passed in by command.
+     * @param isCut True if called from cut, false otherwise.
+     */
+    fun executeCopyCut(editor: TextEditor, args: List<String>, isCut: Boolean) {
+        editor.clearClipboard()
+        if (args.isNotEmpty() && args[0].contains(':')) {
+            // !!k <lines before>:<line after>
+            val (lineBefore, lineAfter) = args[0].split(':')
+                .let { (it[0].toIntOrNull() ?: 0) to (it[1].toIntOrNull() ?: 0) }
+            editor.clipBoard = Clipboard.EMPTY_CLIPBOARD
+            val cursorPos = editor.cursorPosition
+
+            editor.cursorPosition -= lineBefore
+            for (i in lineBefore..lineAfter) {
+                if (isCut) {
+                    editor.fileData.remove(editor.cursorPosition)
+                }
+                editor.clipBoard.clipboardArray.add(editor.fileData[editor.cursorPosition])
+            }
+            editor.cursorPosition = cursorPos
+        } else {
+            if (isCut) {
+                editor.fileData.remove(editor.cursorPosition)
+            }
+            editor.clipBoard = Clipboard(editor.fileData[editor.cursorPosition])
+        }
     }
 }
 
@@ -98,7 +132,7 @@ object CopyFunction: AltFunction, EventHandler() {
     }
 
     override fun exec(editor: TextEditor, args: List<String>) {
-
+        CutFunction.executeCopyCut(editor, args, false)
     }
 }
 
@@ -147,7 +181,7 @@ object ClipboardEventSubscriber {
 @ProcessPriority(ProcessPriorityLevel.NORMAL)
 object CutEvent: ProcessEvent {
     override fun onProcessStart(editor: TextEditor): Boolean {
-        if (!editor.isSelectionMode()) {
+        if (!editor.isSelectionMode() || editor.isEmptyClipboard()) {
             return true
         }
 
@@ -164,7 +198,7 @@ object CutEvent: ProcessEvent {
 @ProcessPriority(ProcessPriorityLevel.NORMAL)
 object CopyEvent: ProcessEvent {
     override fun onProcessStart(editor: TextEditor): Boolean {
-        if (!editor.isSelectionMode()) {
+        if (!editor.isSelectionMode() || editor.isEmptyClipboard()) {
             return true
         }
 

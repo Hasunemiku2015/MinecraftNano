@@ -31,7 +31,7 @@ class SparseVector<T> (private val defaultValue: T) {
         }
     }
 
-    fun delete(i: Int) {
+    fun remove(i: Int) {
         val list = ArrayList(this.asList())
         clear()
         list.removeAt(i)

@@ -3,13 +3,9 @@ package com.hasunemiku2015.minecraftnano.builtin.function
 import com.hasunemiku2015.minecraftnano.TextEditor
 import com.hasunemiku2015.minecraftnano.api.EventHandler
 import com.hasunemiku2015.minecraftnano.api.Function
-import com.hasunemiku2015.minecraftnano.api.ProcessPriority
-import com.hasunemiku2015.minecraftnano.api.ProcessPriorityLevel
 import com.hasunemiku2015.minecraftnano.builtin.FunctionHelper
 import com.hasunemiku2015.minecraftnano.datastruct.ChangeRecord
-import com.hasunemiku2015.minecraftnano.datastruct.Record
 import com.hasunemiku2015.minecraftnano.datastruct.UndoBuffer
-import net.bytebuddy.build.Plugin.Factory.UsingReflection.Priority
 
 /**
  * @author hasunemiku2015
@@ -32,9 +28,9 @@ object BackspaceFunction: Function, EventHandler() {
                 it.cursorCharPosition = it.fileData[it.cursorPosition].length
 
                 it.fileData[it.cursorPosition] = it.fileData[it.cursorPosition] + lineString
-                it.fileData.delete(it.cursorPosition + 1)
+                it.fileData.remove(it.cursorPosition + 1)
                 it.outputBuffer[it.cursorPosition] = it.outputBuffer[it.cursorPosition] + outputBufferLineString
-                it.outputBuffer.delete(it.cursorPosition + 1)
+                it.outputBuffer.remove(it.cursorPosition + 1)
             } else {
                 deletePrevChar(editor)
             }

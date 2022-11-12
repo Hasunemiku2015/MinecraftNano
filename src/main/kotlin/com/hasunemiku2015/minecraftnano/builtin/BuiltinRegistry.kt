@@ -27,6 +27,7 @@ object BuiltinRegistry {
 
         // Register LifecycleProcessors
         NanoRegistry.registerLifecycleProcessor(AnchorStore.AnchorProcessor)
+        NanoRegistry.registerLifecycleProcessor(ClipboardStore.ClipboardLifecycleProcessor)
         NanoRegistry.registerLifecycleProcessor(SearchConfiguration.SearchProcessor)
         NanoRegistry.registerLifecycleProcessor(SelectionRange.SelectionLifecycleProcessor)
         NanoRegistry.registerLifecycleProcessor(UndoProcessor)

@@ -14,8 +14,8 @@ object DeleteRegionFunction: AltFunction, EventHandler() {
         FunctionHelper.repeatTimes(editor, args, this) {
             it.fileData[it.cursorPosition] = it.fileData[it.cursorPosition + 1]
             it.outputBuffer[it.cursorPosition] = it.outputBuffer[it.cursorPosition + 1]
-            it.fileData.delete(it.cursorPosition + 1)
-            it.outputBuffer.delete(it.cursorPosition + 1)
+            it.fileData.remove(it.cursorPosition + 1)
+            it.outputBuffer.remove(it.cursorPosition + 1)
         }
     }
 }
